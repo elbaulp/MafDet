@@ -5,7 +5,7 @@ version := "1.0"
 scalaVersion := "2.12.0"
 
 scalacOptions := Seq(
-  "-encoding", "UTF-8", "-optimise",
+  "-encoding", "UTF-8", "-opt:l:classpath",
   "-deprecation", "-unchecked", "-feature", "-Xlint", "-Ywarn-infer-any")
 
 libraryDependencies ++= Seq(
