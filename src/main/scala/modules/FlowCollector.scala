@@ -1,7 +1,3 @@
-import spray.json.JsonParser
-
-import scalaj.http.Http
-
 /*
  * Copyright 2016 Alejandro Alcalde
  *
@@ -18,16 +14,11 @@ import scalaj.http.Http
  * limitations under the License.
  */
 
+package modules
+
 /**
   * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
   */
-object Main extends App {
-  val logger = org.log4s.getLogger
-  logger.info("Starting app")
+class FlowCollector {
 
-  val request = Http("http://192.168.56.102:8080/stats/flow/1")
-
-  val responseOne = request.asString
-
-  logger.debug(s"\n\n${JsonParser(responseOne.body).prettyPrint}")
 }
