@@ -9,10 +9,13 @@ scalacOptions := Seq(
   "-deprecation", "-unchecked", "-feature", "-Xlint", "-Ywarn-infer-any")
 
 libraryDependencies ++= Seq(
-  "org.log4s" %% "log4s" % "1.3.3",
-  "ch.qos.logback" % "logback-classic" % "1.0.13",
-  "org.scalaj" %% "scalaj-http" % "2.3.0",
-  "io.spray" %%  "spray-json" % "1.3.2"
+  "org.log4s" %% "log4s" % "latest.release",
+  "ch.qos.logback" % "logback-classic" % "latest.release",
+  "org.scalaj" %% "scalaj-http" % "latest.release",
+  "io.spray" %%  "spray-json" % "latest.release",
+  "org.specs2" %% "specs2-core" % "latest.release" % "test"
 )
+
+scalacOptions in Test ++= Seq("-Yrangepos")
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-Xmx1g")
