@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 
+import modules.flowCollector.FlowCollector
 import spray.json.JsonParser
-
-import scalaj.http.Http
 
 /**
   * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
@@ -32,10 +31,5 @@ import scalaj.http.Http
 object Main extends App {
   val logger = org.log4s.getLogger
   logger.info("Starting app")
-
-  val request = Http("http://192.168.56.102:8080/stats/flow/1")
-
-  val responseOne = request.asString
-
-  logger.debug(s"\n\n${JsonParser(responseOne.body).prettyPrint}")
+  logger.debug(s"\n\n${JsonParser(FlowCollector.getSwitchFlows(1).body).prettyPrint}")
 }
