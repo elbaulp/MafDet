@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "latest.release",
   "org.scalaj" %% "scalaj-http" % "latest.release",
   "io.spray" %%  "spray-json" % "latest.release",
-  "org.specs2" %% "specs2-core" % "latest.release" % "test"
+  "org.specs2" %% "specs2-core" % "latest.release" % "test",
+  "org.specs2" %% "specs2-gwt" % "latest.release" % "test"
 )
 
 scalacOptions in Test ++= Seq("-Yrangepos")
