@@ -1,7 +1,7 @@
 import modules.flowCollector.FlowCollector
 import org.specs2.Specification
 import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
-import spray.json.JsonParser
+import spray.json._
 
 class FlowCollectorSpec extends Specification
   with GWT
@@ -15,7 +15,7 @@ class FlowCollectorSpec extends Specification
       Then status code should be: 200                                          ${connectTest.end}
 
      Retrieving values                                                          ${gettingValues.start}
-      Given an api call response: {"1": [{"actions": ["OUTPUT:CONTROLLER"], "idle_timeout": 0, "cookie": 0, "packet_count": 1212, "hard_timeout": 0, "byte_count": 72720, "duration_sec": 432, "duration_nsec": 903000000, "priority": 65535, "length": 96, "flags": 0, "table_id": 0, "match": {"dl_type": 35020, "dl_dst": "01:80:c2:00:00:0e"}}, {"actions": ["OUTPUT:CONTROLLER"], "idle_timeout": 0, "cookie": 0, "packet_count": 49, "hard_timeout": 0, "byte_count": 3890, "duration_sec": 432, "duration_nsec": 938000000, "priority": 0, "length": 80, "flags": 0, "table_id": 0, "match": {}}]}
+      Given a json response from previous request
       When extracting key: packet_count
       Then a field look up should return: true                                  ${gettingValues.end}
     """
@@ -23,6 +23,7 @@ class FlowCollectorSpec extends Specification
   val stepParser = readAs(".*: (.*)$").and((s: String) => s)
   val jsonExtractor = readAs(".+?: (.*)$").and((s: String) => JsonParser(s).asJsObject)
   val aJsonKey = aString
+  val jsonResponse = readAs(".*").and((_: String) => FlowCollector.getSwitchFlows(1).body.parseJson.asJsObject)
 
   val connectTest =
     Scenario("connectTest").
@@ -33,7 +34,7 @@ class FlowCollectorSpec extends Specification
 
   val gettingValues =
     Scenario("Getting Values").
-      given(jsonExtractor).
+      given(jsonResponse).
       when(aJsonKey) { case key :: json :: _ => json.fields contains key }.
       andThen() {
         case expected :: exists :: _ =>
