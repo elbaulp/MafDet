@@ -25,6 +25,7 @@
 package modules.flowCollector
 
 import modules.flowCollector.Constants._
+import org.log4s._
 
 import scalaj.http.{Http, HttpResponse}
 
@@ -32,11 +33,15 @@ import scalaj.http.{Http, HttpResponse}
   * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
   */
 object FlowCollector {
+  private val logger = getLogger
   /**
     * Get all flow statistics for the given switch ID
     *
     * @param sId dpid for the Switch
     * @return The Http response for the API call
     */
-  def getSwitchFlows(sId: Int): HttpResponse[String] = Http(GetAllFlowStats + 1).asString
+  def getSwitchFlows(sId: Int): HttpResponse[String] = {
+    logger.debug(s"Calling getSwtichFlows for ${GetAllFlowStats + sId}")
+    Http(GetAllFlowStats + sId).asString
+  }
 }
