@@ -23,7 +23,6 @@
  */
 
 import modules.flowCollector.FlowCollector
-import spray.json.JsonParser
 
 /**
   * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
@@ -31,5 +30,5 @@ import spray.json.JsonParser
 object Main extends App {
   val logger = org.log4s.getLogger
   logger.info("Starting app")
-  logger.debug(s"\n\n${JsonParser(FlowCollector.getSwitchFlows(1).body).prettyPrint}")
+  logger.debug(s"\n\n${FlowCollector.getSwitchFlows(1).prettyPrint}")
 }
