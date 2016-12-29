@@ -12,7 +12,8 @@ libraryDependencies ++= Seq(
   "org.log4s" %% "log4s" % "latest.release",
   "ch.qos.logback" % "logback-classic" % "latest.release",
   "org.scalaj" %% "scalaj-http" % "latest.release",
-  "io.spray" %%  "spray-json" % "latest.release",
+//  "io.spray" %%  "spray-json" % "latest.release",
+  "org.json4s" %% "json4s-native" % "latest.release",
   "org.specs2" %% "specs2-core" % "latest.release" % "test",
   "org.specs2" %% "specs2-gwt" % "latest.release" % "test"
 )

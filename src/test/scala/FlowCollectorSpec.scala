@@ -19,7 +19,7 @@ class FlowCollectorSpec extends Specification
   private[this] val gettingValues =
     Scenario("Getting Values").
       given(jsonResponse).
-      when(aJsonKey) { case key :: json :: _ => json.fields contains key }.
+      when(aJsonKey) { case key :: json :: _ => json.children contains key }.
       andThen() {
         case expected :: exists :: _ =>
           if (expected == "true") exists must_== true

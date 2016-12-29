@@ -30,5 +30,5 @@ package modules.flowCollector
 object Constants {
   val BaseUrl = "http://192.168.56.101:8080"
 
-  val GetAllFlowStats = BaseUrl + "/stats/flow/"
+  val FlowStats = BaseUrl + "/stats/flow/"
 }

@@ -25,8 +25,10 @@
 package modules.flowCollector
 
 import modules.flowCollector.Constants._
+import org.json4s._
+import org.json4s.native.JsonMethods._
 import org.log4s._
-import spray.json._
+import scala.annotation.switch
 
 import scalaj.http.Http
 
@@ -35,14 +37,50 @@ import scalaj.http.Http
   */
 object FlowCollector {
   private val logger = getLogger
+
   /**
     * Get all flow statistics for the given switch ID
     *
     * @param sId dpid for the Switch
     * @return The Http response for the API call
     */
-  def getSwitchFlows(sId: Int): JsObject = {
-    logger.debug(s"Calling getSwtichFlows for ${GetAllFlowStats + sId}")
-     Http(GetAllFlowStats + sId).asString.body.parseJson.asJsObject
+  def getSwitchFlows(sId: Int): JValue = {
+    logger.trace(s"Calling getSwtichFlows for ${FlowStats + sId}")
+    parse(Http(FlowStats + sId).asString.body)
+  }
+
+  /**
+    * Get Average of Packets per flow (APf)
+    *
+    * @param sId switch's dpid
+    * @return The average packets per flow for the given switch
+    */
+  def APf(sId: Int): BigInt = {
+    logger.trace(s"Calling APf for ${FlowStats + sId}")
+
+    val json = parse(Http(FlowStats + sId).asString.body)
+    val nFlows = json.children.head.children.size
+    val pktCount = (json \\ "packet_count" \\ classOf[JInt]).sorted
+    logger.debug(s"#(flows): $nFlows, #(pkt): $pktCount")
+
+    val medianPkt = computeMedian(pktCount)
+    logger.debug(s"APf: $medianPkt")
+
+    medianPkt
+  }
+  def APfTest(packets:Seq[Int]): BigInt = computeMedian(packets map (BigInt(_)))
+
+  /**
+    * Compute the median value for a given sequence of packets per flow
+    * @param pkt Sequence of packets per flow to compute the median
+    * @return The median
+    */
+  private[this] def computeMedian(pkt: Seq[BigInt]) = {
+    logger.trace("Calling computeMedian")
+    val nflows = pkt.size
+    (nflows & 1: @switch) match {
+      case 0 => (pkt((nflows - 1) / 2) + pkt(nflows/2)) / 2
+      case 1 => pkt(nflows / 2)
+    }
   }
 }
