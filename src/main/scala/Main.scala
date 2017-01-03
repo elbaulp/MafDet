@@ -23,10 +23,10 @@
  */
 
 import modules.flowCollector.FlowCollector
-import org.json4s.native.JsonMethods.{pretty, render}
+import org.json4s.native.JsonMethods.{ pretty, render }
 /**
-  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
-  */
+ * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
+ */
 object Main extends App {
   val logger = org.log4s.getLogger
   logger.info("Starting app")

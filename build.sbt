@@ -2,11 +2,17 @@ name := "DDoS-Detection-System"
 
 version := "1.0"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.11.8"
 
 scalacOptions := Seq(
-  "-encoding", "UTF-8", "-opt:l:classpath",
+  "-encoding", "UTF-8",
   "-deprecation", "-unchecked", "-feature", "-Xlint", "-Ywarn-infer-any")
+
+fork in Test := true
+
+//scalacOptions := Seq(
+//  "-encoding", "UTF-8", "-opt:l:classpath",
+//  "-deprecation", "-unchecked", "-feature", "-Xlint", "-Ywarn-infer-any")
 
 libraryDependencies ++= Seq(
   "org.log4s" %% "log4s" % "latest.release",
@@ -21,3 +27,7 @@ libraryDependencies ++= Seq(
 scalacOptions in Test ++= Seq("-Yrangepos")
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-Xmx1g")
+
+javaOptions in (Test) += "-Xdebug"
+
+javaOptions in (Test) += "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
