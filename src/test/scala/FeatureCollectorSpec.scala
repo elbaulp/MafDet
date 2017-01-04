@@ -53,8 +53,14 @@ class FeatureCollectorSpec extends Specification
     Compute median Average of Bytes per Flow                        ${abf.start}
       Given a list of number of bytes per flow: 5, 10, 15, 20, 25
       When computing ABf
-      Then ABf should be: 15
-                                                                    ${abf.end}
+      Then ABf should be: 15                                        ${abf.end}
+
+    Compute median Average of Bytes per Flow from controller        ${abfController.start}
+      Given a flow stats url: /stats/flow/
+      When getting flow stats for a switch with id: 1
+      Then APf should be > 0
+      and the number of flow entries should be > 0                  ${abfController.end}
+
     """
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
@@ -74,6 +80,13 @@ class FeatureCollectorSpec extends Specification
 
   private val apfEven =
     apfOdd.withTitle("APF with even number")
+
+  private val abfController =
+    Scenario("ABf for controller").
+      given(aString).
+      when(anInt) { case dpid :: _ => FlowCollector.ABf(dpid) }.
+      andThen(anInt) { case expected :: response :: _ => response.toInt must be_>=(expected) }.
+      andThen(anInt) { case expected :: response :: _ => response.toInt must be_>=(expected) }
 
   private val abf =
     Scenario("ABf Tuple").
