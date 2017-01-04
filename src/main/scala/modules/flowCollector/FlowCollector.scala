@@ -33,28 +33,28 @@ import scala.annotation.switch
 import scalaj.http.Http
 
 /**
-  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
-  */
+ * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
+ */
 object FlowCollector {
   private val logger = getLogger
 
   /**
-    * Get all flow statistics for the given switch ID
-    *
-    * @param sId dpid for the Switch
-    * @return The Http response for the API call
-    */
+   * Get all flow statistics for the given switch ID
+   *
+   * @param sId dpid for the Switch
+   * @return The Http response for the API call
+   */
   def getSwitchFlows(sId: Int): JValue = {
     logger.trace(s"Calling getSwtichFlows for ${FlowStats + sId}")
     parse(Http(FlowStats + sId).asString.body)
   }
 
   /**
-    * Get Average of Packets per flow (APf)
-    *
-    * @param sId switch's dpid
-    * @return The average packets per flow for the given switch
-    */
+   * Get Average of Packets per flow (APf)
+   *
+   * @param sId switch's dpid
+   * @return The average packets per flow for the given switch
+   */
   def APf(sId: Int): BigInt = {
     logger.trace(s"Calling APf for ${FlowStats + sId}")
 
@@ -68,18 +68,30 @@ object FlowCollector {
 
     medianPkt
   }
-  def APfTest(packets:Seq[Int]): BigInt = computeMedian(packets map (BigInt(_)))
+  def APfTest(packets: Seq[Int]): BigInt = computeMedian(packets map (BigInt(_)))
 
   /**
-    * Compute the median value for a given sequence of packets per flow
-    * @param pkt Sequence of packets per flow to compute the median
-    * @return The median
-    */
+   * Get the Average of Bytes per Flow (ABf)
+   *
+   * @param sId switch's dpid
+   * @return The average of bytes per flow for the given switch
+   */
+  def ABf(sId: Int): BigInt = {
+    logger.trace(s"Calling ABf for ${FlowStats + sId}")
+    1
+  }
+  def ABfTest(bytes: Seq[Int]): BigInt = computeMedian(bytes map (BigInt(_)))
+
+  /**
+   * Compute the median value for a given sequence of packets per flow
+   * @param pkt Sequence of packets per flow to compute the median
+   * @return The median
+   */
   private[this] def computeMedian(pkt: Seq[BigInt]) = {
     logger.trace("Calling computeMedian")
     val nflows = pkt.size
     (nflows & 1: @switch) match {
-      case 0 => (pkt((nflows - 1) / 2) + pkt(nflows/2)) / 2
+      case 0 => (pkt((nflows - 1) / 2) + pkt(nflows / 2)) / 2
       case 1 => pkt(nflows / 2)
     }
   }

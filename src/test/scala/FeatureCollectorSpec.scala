@@ -49,6 +49,12 @@ class FeatureCollectorSpec extends Specification
       When getting flow stats for a switch with id: 1
       Then APf should be > 0
       and the number of flow entries should be > 0                  ${apf.end}
+
+    Compute median Average of Bytes per Flow                        ${abf.start}
+      Given a list of number of bytes per flow: 5, 10, 15, 20, 25
+      When computing ABf
+      Then ABf should be: 15
+                                                                    ${abf.end}
     """
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
@@ -57,8 +63,8 @@ class FeatureCollectorSpec extends Specification
     Scenario("APf tuple").
       given(aString).
       when(anInt) { case dpid :: _ => FlowCollector.APf(dpid) }.
-      andThen(anInt){ case expected :: response :: _ => expected must be_>=(response toInt)}.
-      andThen(anInt){ case expected :: response :: _ => expected must be_>=(response toInt)}
+      andThen(anInt){ case expected :: response :: _ => response.toInt must be_>=(expected)}.
+      andThen(anInt){ case expected :: response :: _ => response.toInt must be_>=(expected)}
 
   private val apfOdd =
     Scenario("APf with odd number").
@@ -68,4 +74,10 @@ class FeatureCollectorSpec extends Specification
 
   private val apfEven =
     apfOdd.withTitle("APF with even number")
+
+  private val abf =
+    Scenario("ABf Tuple").
+      given(anIntList).
+      when() {case _ :: bytes :: _ => FlowCollector.ABfTest(bytes) }.
+      andThen(anInt){ case expected :: result :: _ => expected must_== result }
 }
