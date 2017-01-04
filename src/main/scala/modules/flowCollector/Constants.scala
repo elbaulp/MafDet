@@ -31,4 +31,7 @@ object Constants {
   val BaseUrl = "http://192.168.56.101:8080"
 
   val FlowStats = BaseUrl + "/stats/flow/"
+
+  val PktCountKey = "packet_count"
+  val ByteCountKey = "byte_count"
 }

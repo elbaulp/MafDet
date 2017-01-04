@@ -69,7 +69,7 @@ class FeatureCollectorSpec extends Specification
   private val apfOdd =
     Scenario("APf with odd number").
       given(anIntList).
-      when() {case _ :: pkts :: _ => FlowCollector.APfTest(pkts)}.
+      when() {case _ :: pkts :: _ => FlowCollector.APf(pkts)}.
       andThen(anInt){ case expected :: result :: _ => expected must_== result}
 
   private val apfEven =
@@ -78,6 +78,6 @@ class FeatureCollectorSpec extends Specification
   private val abf =
     Scenario("ABf Tuple").
       given(anIntList).
-      when() {case _ :: bytes :: _ => FlowCollector.ABfTest(bytes) }.
+      when() {case _ :: bytes :: _ => FlowCollector.ABf(bytes) }.
       andThen(anInt){ case expected :: result :: _ => expected must_== result }
 }

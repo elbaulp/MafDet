@@ -50,6 +50,26 @@ object FlowCollector {
   }
 
   /**
+    * Query the controller for the given
+    *
+    * @param sId dpid for the Switch
+    * @param key What json key to retrieve
+    *
+    * @return List of values
+    */
+  def queryController(sId: Int, key: String) = {
+    logger.trace(s"Calling QueryController")
+
+    val json = parse(Http(FlowStats + sId).asString.body)
+    val nFlows = json.children.head.children.size
+    val values = (json \\ key \\ classOf[JInt]).sorted
+
+    logger.debug(s"#(flows): $nFlows, #(pkt): $values")
+
+    values
+  }
+
+  /**
    * Get Average of Packets per flow (APf)
    *
    * @param sId switch's dpid
@@ -58,17 +78,11 @@ object FlowCollector {
   def APf(sId: Int): BigInt = {
     logger.trace(s"Calling APf for ${FlowStats + sId}")
 
-    val json = parse(Http(FlowStats + sId).asString.body)
-    val nFlows = json.children.head.children.size
-    val pktCount = (json \\ "packet_count" \\ classOf[JInt]).sorted
-    logger.debug(s"#(flows): $nFlows, #(pkt): $pktCount")
-
-    val medianPkt = computeMedian(pktCount)
-    logger.debug(s"APf: $medianPkt")
-
-    medianPkt
+    val pktCount = queryController(sId, Constants.PktCountKey)
+    computeMedian(pktCount)
   }
-  def APfTest(packets: Seq[Int]): BigInt = computeMedian(packets map (BigInt(_)))
+
+  def  APf(packets: Seq[Int]): BigInt = computeMedian(packets map (BigInt(_)))
 
   /**
    * Get the Average of Bytes per Flow (ABf)
@@ -78,9 +92,12 @@ object FlowCollector {
    */
   def ABf(sId: Int): BigInt = {
     logger.trace(s"Calling ABf for ${FlowStats + sId}")
-    1
+
+    val byteCount = queryController(sId, Constants.ByteCountKey)
+    computeMedian(byteCount)
   }
-  def ABfTest(bytes: Seq[Int]): BigInt = computeMedian(bytes map (BigInt(_)))
+
+  def ABf(bytes: Seq[Int]): BigInt = computeMedian(bytes map (BigInt(_)))
 
   /**
    * Compute the median value for a given sequence of packets per flow
