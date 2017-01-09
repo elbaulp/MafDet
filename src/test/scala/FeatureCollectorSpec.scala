@@ -34,33 +34,38 @@ class FeatureCollectorSpec extends Specification
   with StandardRegexStepParsers {
   def is =
     s2"""
-    Compute median of Average Packets per Flow when # flows is odd  ${apfOdd.start}
+    COMPUTE MEDIAN OF AVERAGE PACKETS PER FLOW WHEN # FLOWS IS ODD          ${apfOdd.start}
       Given a odd list of packets per flow: 5, 10, 15, 20, 25
       When computing APf
-      Then APf should be: 15                                        ${apfOdd.end}
+      Then APf should be: 15                                                ${apfOdd.end}
 
-    Compute median of Average Packets per Flow when # flows is even ${apfEven.start}
+    COMPUTE MEDIAN OF AVERAGE PACKETS PER FLOW WHEN # FLOWS IS EVEN         ${apfEven.start}
       Given a even list of packets per flow: 5, 100, 10, 15, 20, 25
       When computing APf
-      Then APf should be: 12                                        ${apfEven.end}
+      Then APf should be: 12                                                ${apfEven.end}
 
-    Collect number of flows and packets for tuple 1 (Avg pkt count) ${apf.start}
+    COLLECT NUMBER OF FLOWS AND PACKETS FOR TUPLE 1 (AVG PKT COUNT)         ${apf.start}
       Given flow stats url: /stats/flow/
       When getting flow stats for a switch with id: 1
       Then APf should be > 0
-      and the number of flow entries should be > 0                  ${apf.end}
+      and the number of flow entries should be > 0                          ${apf.end}
 
-    Compute median Average of Bytes per Flow                        ${abf.start}
+    COMPUTE MEDIAN AVERAGE OF BYTES PER FLOW                                ${abf.start}
       Given a list of number of bytes per flow: 5, 10, 15, 20, 25
       When computing ABf
-      Then ABf should be: 15                                        ${abf.end}
+      Then ABf should be: 15                                                ${abf.end}
 
-    Compute median Average of Bytes per Flow from controller        ${abfController.start}
+    COMPUTE MEDIAN AVERAGE OF BYTES PER FLOW FROM CONTROLLER                ${abfController.start}
       Given a flow stats url: /stats/flow/
       When getting flow stats for a switch with id: 1
       Then APf should be > 0
-      and the number of flow entries should be > 0                  ${abfController.end}
+      and the number of flow entries should be > 0                          ${abfController.end}
 
+    COMPUTE MEDIAN FOR THE DURATION OF TIME A FLOW SPENDS IN THE FLOW TABLE ${adf.start}
+      Given a flow stats url: /stats/flow
+      When getting flow stats fro a switch with id: 1
+      Then ADf should be > 0
+                                                                            ${adf.end}
     """
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
@@ -93,4 +98,10 @@ class FeatureCollectorSpec extends Specification
       given(anIntList).
       when() {case _ :: bytes :: _ => FlowCollector.ABf(bytes) }.
       andThen(anInt){ case expected :: result :: _ => expected must_== result }
+
+  private val adf =
+    Scenario("ADf tuple").
+      given(aString).
+      when(anInt) { case dpid :: _ => FlowCollector.ADf(dpid) }.
+      andThen(anInt) { case expected :: result :: _ => result.toInt must be_>=(expected) }
 }

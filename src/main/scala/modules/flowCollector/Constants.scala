@@ -28,10 +28,11 @@ package modules.flowCollector
   * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/15/16.
   */
 object Constants {
-  val BaseUrl = "http://192.168.56.101:8080"
+  val BaseUrl      = "http://192.168.56.101:8080"
 
-  val FlowStats = BaseUrl + "/stats/flow/"
+  val FlowStats    = BaseUrl + "/stats/flow/"
 
-  val PktCountKey = "packet_count"
+  val PktCountKey  = "packet_count"
   val ByteCountKey = "byte_count"
+  val DurationSec  = "duration_sec"
 }
