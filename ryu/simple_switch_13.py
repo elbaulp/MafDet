@@ -52,7 +52,7 @@ class SimpleSwitch13(app_manager.RyuApp):
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
 
-    def add_flow(self, datapath, priority, match, actions, buffer_id=None):
+    def add_flow(self, datapath, priority, match, actions, buffer_id=None, hard_timeout=0):
 
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -62,10 +62,10 @@ class SimpleSwitch13(app_manager.RyuApp):
         if buffer_id:
             mod = parser.OFPFlowMod(datapath=datapath, buffer_id=buffer_id,
                                     priority=priority, match=match,
-                                    instructions=inst)
+                                    instructions=instm, hard_timeout=hard_timeout)
         else:
             mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                    match=match, instructions=inst)
+                                    match=match, instructions=inst, hard_timeout=hard_timeout)
         datapath.send_msg(mod)
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -112,18 +112,20 @@ class SimpleSwitch13(app_manager.RyuApp):
         # install a flow to avoid packet_in next time
         if out_port != ofproto.OFPP_FLOOD:
             priority = 1
+            hard_timeout = 0
             if ip == None:
                 match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
                 priority = 2
+                hard_timeout = 2
             else:
                 match = parser.OFPMatch(in_port=in_port, eth_dst=dst, ipv4_src=ip.src, ipv4_dst=ip.dst, eth_type=0x0800)
             # verify if we have a valid buffer_id, if yes avoid to send both
             # flow_mod & packet_out
             if msg.buffer_id != ofproto.OFP_NO_BUFFER:
-                self.add_flow(datapath, priority, match, actions, msg.buffer_id)
+                self.add_flow(datapath, priority, match, actions, msg.buffer_id, hard_timeout)
                 return
             else:
-                self.add_flow(datapath, priority, match, actions)
+                self.add_flow(datapath, priority, match, actions, hard_timeout=hard_timeout)
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
             data = msg.data
