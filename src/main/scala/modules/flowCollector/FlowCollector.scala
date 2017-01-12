@@ -64,7 +64,7 @@ object FlowCollector {
     val nFlows = json.children.head.children.size
     val values = (json \\ key \\ classOf[JInt]).sorted
 
-    logger.debug(s"#(flows): $nFlows, #(pkt): $values")
+    logger.debug(s"#(flows): $nFlows, #(pkt): $values, json: \n${pretty(render(json \\ key))}")
 
     values
   }
@@ -110,6 +110,22 @@ object FlowCollector {
     computeMedian(duration)
   }
   def ADf(duration: Seq[Int]): BigInt = computeMedian(duration map (BigInt(_)))
+
+  /**
+    * Get the number of Pair-Flows
+    *
+    * @param sId switch's dpid
+    * @return Number of Pair-Flows
+    */
+  def PPf(sId: Int): Int = {
+    logger.trace(s"Calling PPf for ${FlowStats + sId}")
+
+    val pairflow = queryController(sId, Constants.Match)
+    logger.error(s"${pretty(parse(pairflow))}")
+    logger.error(s"$pairflow")
+
+    1
+  }
 
   /**
     * Compute the median value for a given sequence of packets per flow

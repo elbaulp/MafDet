@@ -66,7 +66,20 @@ class FeatureCollectorSpec extends Specification
       When getting flow stats fro a switch with id: 1
       Then ADf should be > 0
                                                                             ${adf.end}
+
+    COMPUTE PERCENTAGE OF PAIR-FLOWS                                        ${ppf.start}
+      Given a flow stats url: /stats/flow
+      When getting flow stats for a switch with id: 1
+      Then PPf should be > 0
+                                                                            ${ppf.end}
     """
+
+  /* COMPUTE PERCENTAGE OF PAIR-FLOWS                                        ${ppf.start}
+   *   Given a flow with nw_src: 10.0.0.1 and nw_dst: 10.0.0.2
+   *   Given a flow with nw_src: 10.0.0.2 and nw_dst: 10.0.0.1
+   *   When computing PPf
+   *   Then PPf should be 1
+   *                                                                          ${ppf.end} */
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
 
@@ -104,4 +117,13 @@ class FeatureCollectorSpec extends Specification
       given(aString).
       when(anInt) { case dpid :: _ => FlowCollector.ADf(dpid) }.
       andThen(anInt) { case expected :: result :: _ => result.toInt must be_>=(expected) }
+
+  private val ppf =
+    Scenario("PPf tuple").
+      given(aString).
+      when(anInt) {case dpid :: _ => FlowCollector.PPf(dpid)}.
+      andThen(anInt){ case expected :: result :: _ => expected must_== result}
+
+  //private val ppf =
+//    apfOdd.withTitle("APF with even number")
 }
