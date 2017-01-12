@@ -62,11 +62,8 @@ object FlowCollector {
 
     val json = parse(Http(FlowStats + sId).asString.body)
     val nFlows = json.children.head.children.size
-    val values = (json \\ key \\ classOf[JInt]).sorted
 
-    logger.debug(s"#(flows): $nFlows, #(pkt): $values, json: \n${pretty(render(json \\ key))}")
-
-    values
+    (json \\ key)
   }
 
   /**
@@ -79,7 +76,8 @@ object FlowCollector {
     logger.trace(s"Calling APf for ${FlowStats + sId}")
 
     val pktCount = queryController(sId, Constants.PktCountKey)
-    computeMedian(pktCount)
+
+    computeMedian(pktCount \\ classOf[JInt])
   }
   def APf(packets: Seq[Int]): BigInt = computeMedian(packets map (BigInt(_)))
 
@@ -93,7 +91,7 @@ object FlowCollector {
     logger.trace(s"Calling ABf for ${FlowStats + sId}")
 
     val byteCount = queryController(sId, Constants.ByteCountKey)
-    computeMedian(byteCount)
+    computeMedian(byteCount \\ classOf[JInt])
   }
   def ABf(bytes: Seq[Int]): BigInt = computeMedian(bytes map (BigInt(_)))
 
@@ -107,7 +105,7 @@ object FlowCollector {
     logger.trace(s"Calling ADf for ${FlowStats + sId}")
 
     val duration = queryController(sId, Constants.DurationSec)
-    computeMedian(duration)
+    computeMedian(duration \\ classOf[JInt])
   }
   def ADf(duration: Seq[Int]): BigInt = computeMedian(duration map (BigInt(_)))
 
@@ -121,8 +119,7 @@ object FlowCollector {
     logger.trace(s"Calling PPf for ${FlowStats + sId}")
 
     val pairflow = queryController(sId, Constants.Match)
-    logger.error(s"${pretty(parse(pairflow))}")
-    logger.error(s"$pairflow")
+    logger.debug(s"\n${pretty(render(pairflow))}")
 
     1
   }
@@ -134,10 +131,11 @@ object FlowCollector {
     */
   private[this] def computeMedian(pkt: Seq[BigInt]) = {
     logger.trace("Calling computeMedian")
-    val nflows = pkt.size
+    val pktSorted = pkt.sorted
+    val nflows = pktSorted.size
       (nflows & 1: @switch) match {
-      case 0 => (pkt((nflows - 1) / 2) + pkt(nflows / 2)) / 2
-      case 1 => pkt(nflows / 2)
+      case 0 => (pktSorted((nflows - 1) / 2) + pktSorted(nflows / 2)) / 2
+      case 1 => pktSorted(nflows / 2)
     }
   }
 }
