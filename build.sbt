@@ -2,7 +2,7 @@ name := "DDoS-Detection-System"
 
 version := "1.0"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.11.8"
 
 scalacOptions := Seq(
   "-encoding", "UTF-8",
@@ -15,13 +15,12 @@ fork in Test := true
 //  "-deprecation", "-unchecked", "-feature", "-Xlint", "-Ywarn-infer-any")
 
 libraryDependencies ++= Seq(
-  "org.log4s" %% "log4s" % "latest.release",
-  "ch.qos.logback" % "logback-classic" % "latest.release",
-  "org.scalaj" %% "scalaj-http" % "latest.release",
-//  "io.spray" %%  "spray-json" % "latest.release",
-  "org.json4s" %% "json4s-native" % "latest.release",
-  "org.specs2" %% "specs2-core" % "latest.release" % "test",
-  "org.specs2" %% "specs2-gwt" % "latest.release" % "test"
+  "org.log4s" %% "log4s" % "1.3.4",
+  "ch.qos.logback" % "logback-classic" % "1.1.8",
+  "org.scalaj" %% "scalaj-http" % "2.3.0",
+  "org.json4s" %% "json4s-native" % "3.5.0",
+  "org.specs2" %% "specs2-core" % "3.8.6" % "test",
+  "org.specs2" %% "specs2-gwt" % "3.8.6" % "test"
 )
 
 scalacOptions in Test ++= Seq("-Yrangepos")
