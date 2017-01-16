@@ -24,12 +24,12 @@
 
 package modules.flowCollector
 
+import scala.annotation.switch
+
 import modules.flowCollector.Constants._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.log4s._
-import scala.annotation.switch
-
 import scalaj.http.Http
 
 /**
@@ -39,25 +39,25 @@ object FlowCollector {
   private val logger = getLogger
 
   /**
-    * Get all flow statistics for the given switch ID
-    *
-    * @param sId dpid for the Switch
-    * @return The Http response for the API call
-    */
+   * Get all flow statistics for the given switch ID
+   *
+   * @param sId dpid for the Switch
+   * @return The Http response for the API call
+   */
   def getSwitchFlows(sId: Int): JValue = {
     logger.trace(s"Calling getSwtichFlows for ${FlowStats + sId}")
     parse(Http(FlowStats + sId).asString.body)
   }
 
   /**
-    * Query the controller for the given
-    *
-    * @param sId dpid for the Switch
-    * @param key What json key to retrieve
-    *
-    * @return List of values
-    */
-  private[this] def queryController(sId: Int, key: String) = {
+   * Query the controller for the given
+   *
+   * @param sId dpid for the Switch
+   * @param key What json key to retrieve
+   *
+   * @return List of values
+   */
+  private[this] def queryController(sId: Int, key: String): JValue = {
     logger.trace(s"Calling QueryController")
 
     val json = parse(Http(FlowStats + sId).asString.body)
@@ -67,11 +67,11 @@ object FlowCollector {
   }
 
   /**
-    * Get Average of Packets per flow (APf)
-    *
-    * @param sId switch's dpid
-    * @return The average packets per flow for the given switch
-    */
+   * Get Average of Packets per flow (APf)
+   *
+   * @param sId switch's dpid
+   * @return The average packets per flow for the given switch
+   */
   def APf(sId: Int): BigInt = {
     logger.trace(s"Calling APf for ${FlowStats + sId}")
 
@@ -82,11 +82,11 @@ object FlowCollector {
   def APf(packets: Seq[Int]): BigInt = computeMedian(packets map (BigInt(_)))
 
   /**
-    * Get the Average of Bytes per Flow (ABf)
-    *
-    * @param sId switch's dpid
-    * @return The average of bytes per flow for the given switch
-    */
+   * Get the Average of Bytes per Flow (ABf)
+   *
+   * @param sId switch's dpid
+   * @return The average of bytes per flow for the given switch
+   */
   def ABf(sId: Int): BigInt = {
     logger.trace(s"Calling ABf for ${FlowStats + sId}")
 
@@ -96,11 +96,11 @@ object FlowCollector {
   def ABf(bytes: Seq[Int]): BigInt = computeMedian(bytes map (BigInt(_)))
 
   /**
-    * Get median time a flow is stored on the flow table.
-    *
-    * @param sId switch's dpid
-    * @return The median time a flow is kept in the flow table
-    */
+   * Get median time a flow is stored on the flow table.
+   *
+   * @param sId switch's dpid
+   * @return The median time a flow is kept in the flow table
+   */
   def ADf(sId: Int): BigInt = {
     logger.trace(s"Calling ADf for ${FlowStats + sId}")
 
@@ -110,30 +110,52 @@ object FlowCollector {
   def ADf(duration: Seq[Int]): BigInt = computeMedian(duration map (BigInt(_)))
 
   /**
-    * Get the number of Pair-Flows
-    *
-    * @param sId switch's dpid
-    * @return Number of Pair-Flows
-    */
-  def PPf(sId: Int): Int = {
+   * Get the number of Pair-Flows
+   *
+   * @param sId switch's dpid
+   * @return Number of Pair-Flows
+   */
+  def PPf(sId: Int): Double = {
     logger.trace(s"Calling PPf for ${FlowStats + sId}")
 
-    val pairflow = queryController(sId, Constants.Match)
-    logger.debug(s"\n${pretty(render(pairflow))}")
+    implicit val formats = DefaultFormats
+    val matchs = (queryController(sId, Constants.Match) \ "match").extract[List[OFMatch]]
 
-    1
+    computePairFlows(matchs)
+  }
+  def PPf(flows: Seq[OFMatch]) = computePairFlows(flows)
+
+  /**
+   * Percentage of Pair-Flows (PPf)
+   *
+   * @param total Total number of flows in table
+   * @param pairs How many pair flows
+   *
+   * @return Percentage of pairs flows
+   */
+  private[this] def computePairFlows(flows: Seq[OFMatch]): Double = {
+    val pairFlows = flows.combinations(2).filter { list =>
+      val f1 = list.head
+      val f2 = list.tail.head
+
+      f1.dl_type == f2.dl_type &&
+        f1.nw_dst == f2.nw_src &&
+        f1.nw_src == f2.nw_dst
+    }.size
+
+    2.0 * pairFlows / flows.size
   }
 
   /**
-    * Compute the median value for a given sequence of packets per flow
-    * @param pkt Sequence of packets per flow to compute the median
-    * @return The median
-    */
+   * Compute the median value for a given sequence of packets per flow
+   * @param pkt Sequence of packets per flow to compute the median
+   * @return The median
+   */
   private[this] def computeMedian(pkt: Seq[BigInt]) = {
     logger.trace("Calling computeMedian")
     val pktSorted = pkt.sorted
     val nflows = pktSorted.size
-      (nflows & 1: @switch) match {
+    (nflows & 1: @switch) match {
       case 0 => (pktSorted((nflows - 1) / 2) + pktSorted(nflows / 2)) / 2
       case 1 => pktSorted(nflows / 2)
     }

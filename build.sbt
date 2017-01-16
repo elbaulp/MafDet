@@ -27,6 +27,6 @@ scalacOptions in Test ++= Seq("-Yrangepos")
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-Xmx1g")
 
-javaOptions in (Test) += "-Xdebug"
+//javaOptions in (Test) += "-Xdebug"
 
-javaOptions in (Test) += "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
+//javaOptions in (Test) += "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9999"

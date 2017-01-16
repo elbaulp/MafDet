@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import modules.flowCollector.FlowCollector
+import modules.flowCollector.{ FlowCollector, OFMatch }
 import org.specs2.Specification
 import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
 
@@ -70,18 +70,22 @@ class FeatureCollectorSpec extends Specification
     COMPUTE PERCENTAGE OF PAIR-FLOWS                                        ${ppf.start}
       Given a flow stats url: /stats/flow
       When getting flow stats for a switch with id: 1
-      Then PPf should be > 0
+      Then PPf should be > 0.6
                                                                             ${ppf.end}
-    """
 
-  /* COMPUTE PERCENTAGE OF PAIR-FLOWS                                        ${ppf.start}
-   *   Given a flow with nw_src: 10.0.0.1 and nw_dst: 10.0.0.2
-   *   Given a flow with nw_src: 10.0.0.2 and nw_dst: 10.0.0.1
-   *   When computing PPf
-   *   Then PPf should be 1
-   *                                                                          ${ppf.end} */
+    COMPUTE PERCENTAGE OF PAIR-FLOWS                                        ${ppf2.start}
+      Given a flow with nw_src: 10.0.0.1 and nw_dst: 10.0.0.2
+      Given a flow with nw_src: 10.0.0.2 and nw_dst: 10.0.0.1
+      Given a flow with nw_src: 10.0.0.3 and nw_dst: 10.0.0.6
+      When computing PPf
+      Then PPf should be 0.6666666666666666
+                                                                            ${ppf2.end}
+   """
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
+  val myD = groupAs("\\d+\\.\\d+").and((s: String) => s.toDouble)
+  val anIp = groupAs("\\d+\\.\\d+\\.\\d+\\.\\d+").and((src:String, dst:String) =>
+    OFMatch(nw_src=src, nw_dst=dst))
 
   private val apf =
     Scenario("APf tuple").
@@ -122,7 +126,15 @@ class FeatureCollectorSpec extends Specification
     Scenario("PPf tuple").
       given(aString).
       when(anInt) {case dpid :: _ => FlowCollector.PPf(dpid)}.
-      andThen(anInt){ case expected :: result :: _ => result must be>= expected}
+      andThen(myD){ case expected :: result :: _ => result must be>= expected }
+
+  private val ppf2 =
+    Scenario("PPf Tuple").
+      given(anIp).
+      given(anIp).
+      given(anIp).
+      when() {case _ :: f1 :: f2 :: f3 :: _ => FlowCollector.PPf(Seq(f1,f2,f3))}.
+      andThen(myD){ case expected :: result :: _ => result must_==expected }
 
 //  private val ppf =
 //    apfOdd.withTitle("APF with even number")

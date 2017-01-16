@@ -22,14 +22,18 @@
  * SOFTWARE.
  */
 
-import modules.flowCollector.FlowCollector
-import org.json4s.native.JsonMethods.{ pretty, render }
-/**
-  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
-  */
+package modules.flowCollector
 
-object Main extends App {
-  val logger = org.log4s.getLogger
-  logger.info("Starting app")
-  logger.debug(s"\n\n${pretty(render(FlowCollector.getSwitchFlows(1)))}\n\n")
-}
+/**
+ * Represents a match rule in OpenFlow
+ *
+ * @constructor create a instance of a match rule
+ * @param dl_type Ethernet frame type
+ * @param dl_dst MAC destination
+ * @param in_port Switch's in port
+ * @param nw_dst IP destination address
+ * @param nw_src IP source address
+ *
+ */
+case class OFMatch(dl_type: BigInt = 0x0800, dl_dst: String = "", nw_src: String = "",
+  in_port: BigInt = 0, nw_dst: String = "")
