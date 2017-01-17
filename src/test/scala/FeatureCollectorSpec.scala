@@ -77,6 +77,9 @@ class FeatureCollectorSpec extends Specification
       Given a flow with nw_src: 10.0.0.1 and nw_dst: 10.0.0.2
       Given a flow with nw_src: 10.0.0.2 and nw_dst: 10.0.0.1
       Given a flow with nw_src: 10.0.0.3 and nw_dst: 10.0.0.6
+      Given a flow with nw_src: 10.0.0.4 and nw_dst: 10.0.0.5
+      Given a flow with nw_src: 10.0.0.5 and nw_dst: 10.0.0.4
+      Given a flow with nw_src: 10.0.0.6 and nw_dst: 10.0.0.7
       When computing PPf
       Then PPf should be 0.6666666666666666
                                                                             ${ppf2.end}
@@ -133,7 +136,11 @@ class FeatureCollectorSpec extends Specification
       given(anIp).
       given(anIp).
       given(anIp).
-      when() {case _ :: f1 :: f2 :: f3 :: _ => FlowCollector.PPf(Seq(f1,f2,f3))}.
+      given(anIp).
+      given(anIp).
+      given(anIp).
+      when() {case _ :: f1 :: f2 :: f3 :: f4 :: f5 :: f6 :: _ =>
+        FlowCollector.PPf(Seq(f1,f2,f3, f4, f5, f6))}.
       andThen(myD){ case expected :: result :: _ => result must_==expected }
 
 //  private val ppf =

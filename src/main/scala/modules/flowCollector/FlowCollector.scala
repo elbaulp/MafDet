@@ -134,16 +134,22 @@ object FlowCollector {
    * @return Percentage of pairs flows
    */
   private[this] def computePairFlows(flows: Seq[OFMatch]): Double = {
-    val pairFlows = flows.combinations(2).filter { list =>
-      val f1 = list.head
-      val f2 = list.tail.head
 
-      f1.dl_type == f2.dl_type &&
-        f1.nw_dst == f2.nw_src &&
-        f1.nw_src == f2.nw_dst
-    }.size
+    val table =  flows./:(Map.empty[String,Int]){ case (m,f) =>
+      val key = f.nw_src + f.nw_dst + f.dl_type
+      val inverseKey = f.nw_dst + f.nw_src + f.dl_type
+      val haspair = m get inverseKey match {
+        case Some(v) => v + 1
+        case None => 0
+      }
+      m + (key -> haspair)
+    }
 
-    2.0 * pairFlows / flows.size
+    val pairs = table.filter(_._2>0)
+
+    logger.debug(s"Pairflows: ${pairs.size}, flows: ${flows.size}")
+
+    2.0 * pairs.size / flows.size
   }
 
   /**
