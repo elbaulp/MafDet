@@ -35,5 +35,5 @@ object Constants {
   val PktCountKey  = "packet_count"
   val ByteCountKey = "byte_count"
   val DurationSec  = "duration_sec"
-  val Match        = "match"
+  val MatchKey     = "match"
 }

@@ -36,7 +36,11 @@ import scalaj.http.Http
  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
  */
 object FlowCollector {
+
   private val logger = getLogger
+
+  /** Query the controller at `interval` periods of time (in ms) */
+  val interval = 1000
 
   /**
    * Get all flow statistics for the given switch ID
@@ -119,15 +123,25 @@ object FlowCollector {
     logger.trace(s"Calling PPf for ${FlowStats + sId}")
 
     implicit val formats = DefaultFormats
-    val matchs = (queryController(sId, Constants.Match) \ "match").extract[List[OFMatch]]
+    val matchs = (queryController(sId, Constants.MatchKey) \ "match").extract[List[OFMatch]]
 
     computePairFlows(matchs)
   }
   def PPf(flows: Seq[OFMatch]) = computePairFlows(flows)
 
+  /**
+   * Growth of Single-Flows.
+   *
+   * @param sId switch's dpid
+   * @return Growth of single flows in interval
+   */
   def GSf(sId: Int): Double = {
     logger.trace(s"Calling GSf for ${FlowStats + sId}")
-    1.0
+
+    val pairsFlows = PPf(sId)
+    val nFlows = (queryController(sId, Constants.ByteCountKey) \ classOf[JInt]).size
+
+    (nFlows - (2 * pairsFlows)) / interval
   }
 
   /**

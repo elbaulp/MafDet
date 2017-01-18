@@ -84,7 +84,7 @@ class FeatureCollectorSpec extends Specification
     COMPUTE GROWTH OF SINGLE-FLOWS                                          ${gsf.start}
       Given a flow stats url: /stats/flow
       When getting flow stats for a switch with id: 1
-      Then gsf should be > 0.6                                              ${gsf.end}
+      Then gsf should be < 0.1                                              ${gsf.end}
    """
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
@@ -149,5 +149,5 @@ class FeatureCollectorSpec extends Specification
     Scenario("PPf tuple").
       given(aString).
       when(anInt) {case dpid :: _ => FlowCollector.GSf(dpid)}.
-      andThen(myD){ case expected :: result :: _ => result must be>= expected }
+      andThen(myD){ case expected :: result :: _ => result must be<= expected }
 }
