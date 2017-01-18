@@ -125,6 +125,11 @@ object FlowCollector {
   }
   def PPf(flows: Seq[OFMatch]) = computePairFlows(flows)
 
+  def GSf(sId: Int): Double = {
+    logger.trace(s"Calling GSf for ${FlowStats + sId}")
+    1.0
+  }
+
   /**
    * Percentage of Pair-Flows (PPf)
    *
@@ -134,18 +139,20 @@ object FlowCollector {
    * @return Percentage of pairs flows
    */
   private[this] def computePairFlows(flows: Seq[OFMatch]): Double = {
+    logger.trace("Calling computePairFlows")
 
-    val table =  flows./:(Map.empty[String,Int]){ case (m,f) =>
-      val key = f.nw_src + f.nw_dst + f.dl_type
-      val inverseKey = f.nw_dst + f.nw_src + f.dl_type
-      val haspair = m get inverseKey match {
-        case Some(v) => v + 1
-        case None => 0
-      }
-      m + (key -> haspair)
+    val table = flows./:(Map.empty[String, Int]) {
+      case (m, f) =>
+        val key = f.nw_src + f.nw_dst + f.dl_type
+        val inverseKey = f.nw_dst + f.nw_src + f.dl_type
+        val haspair = m get inverseKey match {
+          case Some(v) => v + 1
+          case None => 0
+        }
+        m + (key -> haspair)
     }
 
-    val pairs = table.filter(_._2>0)
+    val pairs = table.filter(_._2 > 0)
 
     logger.debug(s"Pairflows: ${pairs.size}, flows: ${flows.size}")
 

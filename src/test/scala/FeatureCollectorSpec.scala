@@ -64,14 +64,12 @@ class FeatureCollectorSpec extends Specification
     COMPUTE MEDIAN FOR THE DURATION OF TIME A FLOW SPENDS IN THE FLOW TABLE ${adf.start}
       Given a flow stats url: /stats/flow
       When getting flow stats fro a switch with id: 1
-      Then ADf should be > 0
-                                                                            ${adf.end}
+      Then ADf should be > 0                                                ${adf.end}
 
     COMPUTE PERCENTAGE OF PAIR-FLOWS                                        ${ppf.start}
       Given a flow stats url: /stats/flow
       When getting flow stats for a switch with id: 1
-      Then PPf should be > 0.6
-                                                                            ${ppf.end}
+      Then PPf should be > 0.6                                              ${ppf.end}
 
     COMPUTE PERCENTAGE OF PAIR-FLOWS                                        ${ppf2.start}
       Given a flow with nw_src: 10.0.0.1 and nw_dst: 10.0.0.2
@@ -81,8 +79,12 @@ class FeatureCollectorSpec extends Specification
       Given a flow with nw_src: 10.0.0.5 and nw_dst: 10.0.0.4
       Given a flow with nw_src: 10.0.0.6 and nw_dst: 10.0.0.7
       When computing PPf
-      Then PPf should be 0.6666666666666666
-                                                                            ${ppf2.end}
+      Then PPf should be 0.6666666666666666                                 ${ppf2.end}
+
+    COMPUTE GROWTH OF SINGLE-FLOWS                                          ${gsf.start}
+      Given a flow stats url: /stats/flow
+      When getting flow stats for a switch with id: 1
+      Then gsf should be > 0.6                                              ${gsf.end}
    """
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
@@ -143,6 +145,9 @@ class FeatureCollectorSpec extends Specification
         FlowCollector.PPf(Seq(f1,f2,f3, f4, f5, f6))}.
       andThen(myD){ case expected :: result :: _ => result must_==expected }
 
-//  private val ppf =
-//    apfOdd.withTitle("APF with even number")
+  private val gsf =
+    Scenario("PPf tuple").
+      given(aString).
+      when(anInt) {case dpid :: _ => FlowCollector.GSf(dpid)}.
+      andThen(myD){ case expected :: result :: _ => result must be>= expected }
 }
