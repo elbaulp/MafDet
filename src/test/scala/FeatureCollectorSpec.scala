@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 
-import modules.flowCollector.{ FlowCollector, OFMatch }
+import modules.flowcollector.FlowCollector
+import modules.featureextractor.{OFMatch, FeatureExtractor}
 import org.specs2.Specification
 import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
 
@@ -46,7 +47,7 @@ class FeatureCollectorSpec extends Specification
 
     COLLECT NUMBER OF FLOWS AND PACKETS FOR TUPLE 1 (AVG PKT COUNT)         ${apf.start}
       Given flow stats url: /stats/flow/
-      When getting flow stats for a switch with id: 1
+      When getting flow stats for a switch
       Then APf should be > 0
       and the number of flow entries should be > 0                          ${apf.end}
 
@@ -85,6 +86,11 @@ class FeatureCollectorSpec extends Specification
       Given a flow stats url: /stats/flow
       When getting flow stats for a switch with id: 1
       Then gsf should be < 0.1                                              ${gsf.end}
+
+    COMPUTE GROWTH OF SINGLE-FLOWS                                          ${gdp.start}
+      Given a flow stats url: /stats/flow
+      When getting flow stats for a switch with id: 1
+      Then gdp should be < 0.1                                              ${gdp.end}
    """
 
   val anIntList = groupAs("\\d+").and((a: Seq[String]) => a map(_.toInt))
@@ -92,17 +98,18 @@ class FeatureCollectorSpec extends Specification
   val anIp = groupAs("\\d+\\.\\d+\\.\\d+\\.\\d+").and((src:String, dst:String) =>
     OFMatch(nw_src=src, nw_dst=dst))
 
+  val switchStatistics = FlowCollector.getSwitchFlows(1)
+
   private val apf =
     Scenario("APf tuple").
-      given(aString).
-      when(anInt) { case dpid :: _ => FlowCollector.APf(dpid) }.
+      when() { case dpid :: _ => FeatureExtractor.APf(switchStatistics) }.
       andThen(anInt){ case expected :: response :: _ => response.toInt must be_>=(expected)}.
       andThen(anInt){ case expected :: response :: _ => response.toInt must be_>=(expected)}
 
   private val apfOdd =
     Scenario("APf with odd number").
       given(anIntList).
-      when() {case _ :: pkts :: _ => FlowCollector.APf(pkts)}.
+      when() {case _ :: pkts :: _ => FeatureExtractor.APf(pkts map(BigInt(_)))}.
       andThen(anInt){ case expected :: result :: _ => expected must_== result}
 
   private val apfEven =
@@ -111,26 +118,26 @@ class FeatureCollectorSpec extends Specification
   private val abfController =
     Scenario("ABf for controller").
       given(aString).
-      when(anInt) { case dpid :: _ => FlowCollector.ABf(dpid) }.
+      when(anInt) { case dpid :: _ => FeatureExtractor.ABf(switchStatistics) }.
       andThen(anInt) { case expected :: response :: _ => response.toInt must be_>=(expected) }.
       andThen(anInt) { case expected :: response :: _ => response.toInt must be_>=(expected) }
 
   private val abf =
     Scenario("ABf Tuple").
       given(anIntList).
-      when() {case _ :: bytes :: _ => FlowCollector.ABf(bytes) }.
+      when() {case _ :: bytes :: _ => FeatureExtractor.ABf(bytes map(BigInt(_))) }.
       andThen(anInt){ case expected :: result :: _ => expected must_== result }
 
   private val adf =
     Scenario("ADf tuple").
       given(aString).
-      when(anInt) { case dpid :: _ => FlowCollector.ADf(dpid) }.
+      when(anInt) { case dpid :: _ => FeatureExtractor.ADf(switchStatistics) }.
       andThen(anInt) { case expected :: result :: _ => result.toInt must be_>=(expected) }
 
   private val ppf =
     Scenario("PPf tuple").
       given(aString).
-      when(anInt) {case dpid :: _ => FlowCollector.PPf(dpid)}.
+      when(anInt) {case dpid :: _ => FeatureExtractor.PPf(switchStatistics)}.
       andThen(myD){ case expected :: result :: _ => result must be>= expected }
 
   private val ppf2 =
@@ -142,12 +149,18 @@ class FeatureCollectorSpec extends Specification
       given(anIp).
       given(anIp).
       when() {case _ :: f1 :: f2 :: f3 :: f4 :: f5 :: f6 :: _ =>
-        FlowCollector.PPf(Seq(f1,f2,f3, f4, f5, f6))}.
+        FeatureExtractor.PPf(Seq(f1,f2,f3, f4, f5, f6))}.
       andThen(myD){ case expected :: result :: _ => result must_==expected }
 
   private val gsf =
-    Scenario("PPf tuple").
+    Scenario("GSf tuple").
       given(aString).
-      when(anInt) {case dpid :: _ => FlowCollector.GSf(dpid)}.
+      when(anInt) {case dpid :: _ => FeatureExtractor.GSf(switchStatistics)}.
       andThen(myD){ case expected :: result :: _ => result must be<= expected }
+
+  private val gdp =
+    Scenario("GDP tuple").
+      given(aString).
+      when(anInt) {case dpid :: _ => /*FeatureExtractor.GDp(switchStatistics)*/}.
+      andThen(myD){ case expected :: result :: _ => 1 must_== 1 /*result must be<= expected*/ }
 }

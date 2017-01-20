@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package modules.flowCollector
+package modules.flowcollector
 
 /**
   * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/15/16.

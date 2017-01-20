@@ -1,4 +1,4 @@
-import modules.flowCollector.FlowCollector
+import modules.flowcollector.FlowCollector
 import org.specs2.Specification
 import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
 
