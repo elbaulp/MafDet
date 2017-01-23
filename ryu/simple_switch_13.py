@@ -21,6 +21,7 @@ from ryu.ofproto import ofproto_v1_3
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ipv4
+from ryu.lib.packet import tcp
 from ryu.lib.packet import ether_types
 
 import pdb
@@ -85,7 +86,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
         ip = pkt.get_protocol(ipv4.ipv4)
-#        pdb.set_trace()
+        tcps = pkt.get_protocol(tcp.tcp)
 
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
             # ignore lldp packet
@@ -118,7 +119,8 @@ class SimpleSwitch13(app_manager.RyuApp):
                 priority = 2
                 hard_timeout = 2
             else:
-                match = parser.OFPMatch(in_port=in_port, eth_dst=dst, ipv4_src=ip.src, ipv4_dst=ip.dst, eth_type=0x0800)
+                self.logger.warn('PUERTO ' + str(tcps.src_port))
+                match = parser.OFPMatch(in_port=in_port, eth_dst=dst, ipv4_src=ip.src, ipv4_dst=ip.dst, eth_type=0x0800,ip_proto=6, tcp_src=tcps.src_port)
             # verify if we have a valid buffer_id, if yes avoid to send both
             # flow_mod & packet_out
             if msg.buffer_id != ofproto.OFP_NO_BUFFER:
