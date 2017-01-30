@@ -20,12 +20,9 @@ from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
+from ryu.lib.packet import ether_types
 from ryu.lib.packet import ipv4
 from ryu.lib.packet import tcp
-from ryu.lib.packet import ether_types
-
-import pdb
-from pprint import pprint
 
 class SimpleSwitch13(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
@@ -39,7 +36,6 @@ class SimpleSwitch13(app_manager.RyuApp):
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-        self.logger.error("!!!!!!! %s", ev)
 
         # install table-miss flow entry
         #
@@ -53,8 +49,8 @@ class SimpleSwitch13(app_manager.RyuApp):
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
 
-    def add_flow(self, datapath, priority, match, actions, buffer_id=None, hard_timeout=0):
-
+    def add_flow(self, datapath, priority, match, actions, buffer_id=None):
+        self.logger.info("ADD_FLOW %s", match)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
@@ -63,15 +59,14 @@ class SimpleSwitch13(app_manager.RyuApp):
         if buffer_id:
             mod = parser.OFPFlowMod(datapath=datapath, buffer_id=buffer_id,
                                     priority=priority, match=match,
-                                    instructions=instm, hard_timeout=hard_timeout)
+                                    instructions=inst)
         else:
             mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                    match=match, instructions=inst, hard_timeout=hard_timeout)
+                                    match=match, instructions=inst)
         datapath.send_msg(mod)
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
-
         # If you hit this you might want to increase
         # the "miss_send_length" of your switch
         if ev.msg.msg_len < ev.msg.total_len:
@@ -85,15 +80,12 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
-        ip = pkt.get_protocol(ipv4.ipv4)
-        tcps = pkt.get_protocol(tcp.tcp)
 
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
             # ignore lldp packet
             return
         dst = eth.dst
         src = eth.src
-
 
         dpid = datapath.id
         self.mac_to_port.setdefault(dpid, {})
@@ -112,25 +104,31 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         # install a flow to avoid packet_in next time
         if out_port != ofproto.OFPP_FLOOD:
-            priority = 1
-            hard_timeout = 0
-            if ip == None:
-                match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
-                priority = 2
-                hard_timeout = 2
-            else:
-                self.logger.warn('PUERTO ' + str(tcps.src_port))
-                match = parser.OFPMatch(in_port=in_port, eth_dst=dst, ipv4_src=ip.src, ipv4_dst=ip.dst, eth_type=0x0800,ip_proto=6, tcp_src=tcps.src_port)
+            match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
             # verify if we have a valid buffer_id, if yes avoid to send both
             # flow_mod & packet_out
             if msg.buffer_id != ofproto.OFP_NO_BUFFER:
-                self.add_flow(datapath, priority, match, actions, msg.buffer_id, hard_timeout)
+                self.add_flow(datapath, 1, match, actions, msg.buffer_id)
                 return
             else:
-                self.add_flow(datapath, priority, match, actions, hard_timeout=hard_timeout)
+                self.add_flow(datapath, 1, match, actions)
+
+            if eth.ethertype == ether_types.ETH_TYPE_IP:
+                ip = pkt.get_protocol(ipv4.ipv4)
+                tcpf = pkt.get_protocol(tcp.tcp)
+                self.logger.info("IP \n\n%s\n\n", str(ip))
+                self.logger.info("TCP \n\n%s\n\n", str(tcpf))
+
+                match = parser.OFPMatch(ipv4_src = ip.src, ipv4_dst = ip.dst,
+                                    eth_type = ether_types.ETH_TYPE_IP, ip_proto=6,
+                                    tcp_dst = tcpf.dst_port, tcp_src = tcpf.src_port)
+                self.add_flow(datapath, 1, match, actions)
+
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
             data = msg.data
+
+
 
         out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
                                   in_port=in_port, actions=actions, data=data)
