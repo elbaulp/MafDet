@@ -38,7 +38,7 @@ object FeatureExtractor {
   private val logger = getLogger
 
   /** Query the controller at `interval` periods of time (in ms) */
-  val interval = 1000
+  val interval = 1000.0
 
   /**
    * Get Average of Packets per flow (APf)
@@ -90,6 +90,18 @@ object FeatureExtractor {
     val nFlows = (flows \\ Constants.ByteCountKey \ classOf[JInt]).size
 
     (nFlows - (2 * pairsFlows)) / interval
+  }
+
+  /**
+    * Growth of Different ports
+    *
+    * @param
+    * @return Growth of different ports in interval
+    */
+  def GDp(flows: JValue): Double = {
+    val uniquePorts = (flows \\ Constants.TcpDstKey \ classOf[JInt]).distinct.size
+
+    uniquePorts / interval
   }
 
   /**

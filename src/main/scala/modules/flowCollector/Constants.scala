@@ -36,4 +36,5 @@ object Constants {
   val ByteCountKey = "byte_count"
   val DurationSec  = "duration_sec"
   val MatchKey     = "match"
+  val TcpDstKey    = "tp_dst"
 }

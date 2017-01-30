@@ -87,7 +87,7 @@ class FeatureCollectorSpec extends Specification
       When getting flow stats for a switch with id: 1
       Then gsf should be < 0.1                                              ${gsf.end}
 
-    COMPUTE GROWTH OF SINGLE-FLOWS                                          ${gdp.start}
+    COMPUTE GROWTH OF DIFFERENT PORTS                                       ${gdp.start}
       Given a flow stats url: /stats/flow
       When getting flow stats for a switch with id: 1
       Then gdp should be < 0.1                                              ${gdp.end}
@@ -161,6 +161,6 @@ class FeatureCollectorSpec extends Specification
   private val gdp =
     Scenario("GDP tuple").
       given(aString).
-      when(anInt) {case dpid :: _ => /*FeatureExtractor.GDp(switchStatistics)*/}.
-      andThen(myD){ case expected :: result :: _ => 1 must_== 1 /*result must be<= expected*/ }
+      when(anInt) {case dpid :: _ => FeatureExtractor.GDp(switchStatistics)}.
+      andThen(myD){ case expected :: result :: _ => result must be<= expected }
 }
