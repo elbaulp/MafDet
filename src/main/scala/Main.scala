@@ -24,7 +24,6 @@
 
 package mafdet
 
-
 import akka.actor.{Actor, Props, ActorSystem}
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -47,31 +46,14 @@ import scala.language.postfixOps
  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
  */
 object Main extends App {
-  val system = ActorSystem("MySystem")
-  val actor = system.actorOf(Props[UpdateStatistics])
-
-  import system.dispatcher
-
-  val cancellable =
-    system.scheduler.schedule(0 milliseconds,
-      50 milliseconds,
-      actor,
-      "test")
-}
-
-class UpdateStatistics extends Actor with akka.actor.ActorLogging {
-
-  override def preStart() = {
-    log.debug("Starting")
-  }
-
-  override def preRestart(reason: Throwable, message: Option[Any]): Unit =
-    log.error(reason, "Restarting due to [{}] when processing [{}]",
-      reason.getMessage, message.getOrElse(""))
-
-  def receive = {
-    case "test" =>
-      log.info(s"Executing at ${System.currentTimeMillis()}")
-    case x => log.warning("Received unknown message: {}", x)
-  }
+  /* val system = ActorSystem("MySystem")
+   * val actor = system.actorOf(Props[UpdateStatistics])
+   *
+   * import system.dispatcher
+   *
+   * val cancellable =
+   *   system.scheduler.schedule(0 milliseconds,
+   *     50 milliseconds,
+   *     actor,
+   *     "test") */
 }
