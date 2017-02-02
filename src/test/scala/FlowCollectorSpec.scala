@@ -1,19 +1,14 @@
+import akka.actor.{ActorSystem, Props}
+import akka.pattern.ask
+import akka.util.Timeout
 import mafdet.modules.flowcollector.{FlowCollector, UpdateStatistics}
+import org.json4s._
 import org.specs2.Specification
 import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
 
-import akka.actor.{Actor, Props, ActorSystem}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
-import akka.testkit.TestActorRef
-import akka.util.Timeout
-import scala.concurrent.duration._
-import scala.concurrent.Await
-import akka.pattern.ask
-
-import org.json4s._
-import org.json4s.native.JsonMethods._
 
 class FlowCollectorSpec extends Specification
   with GWT

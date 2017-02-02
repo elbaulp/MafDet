@@ -24,11 +24,11 @@
 
 package mafdet.modules.featureextractor
 
-import scala.annotation.switch
-
 import mafdet.modules.flowcollector.Constants
 import org.json4s._
 import org.log4s._
+
+import scala.annotation.switch
 
 /**
  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.

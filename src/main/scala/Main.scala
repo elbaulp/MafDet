@@ -24,8 +24,6 @@
 
 package mafdet
 
-import akka.actor.{Actor, Props, ActorSystem}
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 

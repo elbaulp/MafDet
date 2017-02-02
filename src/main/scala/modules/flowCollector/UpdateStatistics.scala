@@ -1,7 +1,7 @@
 package mafdet.modules.flowcollector
 
-import akka.actor.{Actor, Props, ActorSystem}
-import scala.concurrent.duration._
+import akka.actor.Actor
+
 import scala.language.postfixOps
 
 class UpdateStatistics extends Actor with akka.actor.ActorLogging {
