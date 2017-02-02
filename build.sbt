@@ -20,7 +20,8 @@ libraryDependencies ++= Seq(
   "org.scalaj" %% "scalaj-http" % "2.3.0",
   "org.json4s" %% "json4s-native" % "3.5.0",
   "org.specs2" %% "specs2-core" % "3.8.6" % "test",
-  "org.specs2" %% "specs2-gwt" % "3.8.6" % "test"
+  "org.specs2" %% "specs2-gwt" % "3.8.6" % "test",
+  "com.typesafe.akka" %% "akka-actor" % "2.4.16"
 )
 
 scalacOptions in Test ++= Seq("-Yrangepos")

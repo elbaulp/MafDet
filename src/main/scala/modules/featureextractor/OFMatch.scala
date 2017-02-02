@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package modules.featureextractor
+package mafdet.modules.featureextractor
 
 /**
  * Represents a match rule in OpenFlow

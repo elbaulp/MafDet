@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package modules.flowcollector
+package mafdet.modules.flowcollector
 
 import Constants._
 import org.json4s._

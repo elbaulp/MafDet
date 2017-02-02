@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-package modules.featureextractor
+package mafdet.modules.featureextractor
 
 import scala.annotation.switch
 
-import modules.flowcollector.Constants
+import mafdet.modules.flowcollector.Constants
 import org.json4s._
 import org.log4s._
 

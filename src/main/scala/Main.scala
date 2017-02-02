@@ -22,13 +22,56 @@
  * SOFTWARE.
  */
 
-import org.json4s.native.JsonMethods.{ pretty, render }
-/**
-  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
-  */
+package mafdet
 
+
+import akka.actor.{Actor, Props, ActorSystem}
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
+
+/* object MyActor {
+ *   case class Greeting(from: String)
+ *   case object Goodbye
+ * }
+ * class MyActor extends Actor with ActorLogging {
+ *   import MyActor._
+ *   def receive = {
+ *     case Greeting(greeter) => log.info(s"I was greeted by $greeter.")
+ *     case Goodbye
+ *         => log.info("Someone said goodbye to me.")
+ *   }
+ * } */
+
+/**
+ * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
+ */
 object Main extends App {
-  //val logger = org.log4s.getLogger
-  //logger.info("Starting app")
-  //logger.debug(s"\n\n${pretty(render(FlowCollector.getSwitchFlows(1)))}\n\n")
+  val system = ActorSystem("MySystem")
+  val actor = system.actorOf(Props[UpdateStatistics])
+
+  import system.dispatcher
+
+  val cancellable =
+    system.scheduler.schedule(0 milliseconds,
+      50 milliseconds,
+      actor,
+      "test")
+}
+
+class UpdateStatistics extends Actor with akka.actor.ActorLogging {
+
+  override def preStart() = {
+    log.debug("Starting")
+  }
+
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit =
+    log.error(reason, "Restarting due to [{}] when processing [{}]",
+      reason.getMessage, message.getOrElse(""))
+
+  def receive = {
+    case "test" =>
+      log.info(s"Executing at ${System.currentTimeMillis()}")
+    case x => log.warning("Received unknown message: {}", x)
+  }
 }

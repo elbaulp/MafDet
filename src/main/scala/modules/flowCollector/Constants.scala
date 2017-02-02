@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package modules.flowcollector
+package mafdet.modules.flowcollector
 
 /**
   * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/15/16.
