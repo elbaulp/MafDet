@@ -1,7 +1,0 @@
-language: scala
-scala:
-   - 2.11.8
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install mininet
-  - sudo mn --topo single,3 --mac --switch ovsk,protocols=OpenFlow13 --controller remote &
