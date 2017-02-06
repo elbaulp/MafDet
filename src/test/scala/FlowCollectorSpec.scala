@@ -1,29 +1,29 @@
-import akka.actor.{ActorSystem, Props}
-import akka.pattern.ask
-import akka.util.Timeout
-import mafdet.modules.flowcollector.{FlowCollector, UpdateStatistics}
-import org.json4s._
-import org.specs2.Specification
-import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
-
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.language.postfixOps
+
+import akka.actor.{ ActorSystem, Props }
+import akka.pattern.ask
+import akka.util.Timeout
+import mafdet.modules.flowcollector.{ FlowCollector, UpdateStatistics }
+import mafdet.modules.flowcollector.UpdateStatistics._
+import org.json4s._
+import org.specs2.Specification
+import org.specs2.specification.script.{ GWT, StandardRegexStepParsers }
 
 class FlowCollectorSpec extends Specification
   with GWT
   with StandardRegexStepParsers {
   def is =
     s2"""
-     Retrieving values                              ${gettingValues.start}
+     Retrieving values                                             ${gettingValues.start}
       Given a json response from previous request
       When extracting key: packet_count
-      Then a field look up should return: true      ${gettingValues.end}
+      Then a field look up should return: true                     ${gettingValues.end}
 
-     Query Controller at fixed intervals            ${intervals.start}
-      Given a 50 milliseconds interval
-      When querying the controller for 10 seconds
-      Then the size should be 200                   ${intervals.end}
+     Query Controller with Akka actor                              ${intervals.start}
+      Given an akka actor
+      When querying the controller through the actor for switch id 1
+      Then a vector of size 1 with the statistics must be returned ${intervals.end}
     """
 
   private[this] val aJsonKey = aString
@@ -42,14 +42,15 @@ class FlowCollectorSpec extends Specification
 
   private[this] val intervals =
     Scenario("Fixed intervals").
-      given(anInt).
-      when(anInt) { case duration :: interval :: _ =>
-        val system = ActorSystem("MySystem")
-        val actor = system.actorOf(Props[UpdateStatistics])
-        implicit val timeout = Timeout(5 seconds)
-        val future = actor ? "test"
+      given().
+      when(anInt) {
+        case dpid :: _ =>
+          val system = ActorSystem("MySystem")
+          val actor = system.actorOf(Props[UpdateStatistics])
+          implicit val timeout = Timeout(5 seconds)
+          val future = actor ? QueryController(dpid)
 
-        Await.result(future, timeout.duration).asInstanceOf[JValue]
+          Vector(Await.result(future, timeout.duration).asInstanceOf[JValue])
       }.
-      andThen(anInt) { case expected :: actual :: _ => expected must_== actual }
+      andThen(anInt) { case expected :: result :: _ => expected must_== result.size }
 }

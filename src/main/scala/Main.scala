@@ -24,9 +24,6 @@
 
 package mafdet
 
-import scala.language.postfixOps
-
-
 /* object MyActor {
  *   case class Greeting(from: String)
  *   case object Goodbye

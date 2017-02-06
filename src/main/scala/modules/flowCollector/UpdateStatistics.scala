@@ -1,8 +1,17 @@
 package mafdet.modules.flowcollector
 
+import UpdateStatistics._
 import akka.actor.Actor
 
-import scala.language.postfixOps
+object UpdateStatistics {
+  /**
+   * Query the controller for the given switch Id
+   *
+   * @param dpId Switch's Id
+   */
+  case class QueryController(dpId: Int)
+  case object Stop
+}
 
 class UpdateStatistics extends Actor with akka.actor.ActorLogging {
 
@@ -15,10 +24,10 @@ class UpdateStatistics extends Actor with akka.actor.ActorLogging {
       reason.getMessage, message.getOrElse(""))
 
   def receive = {
-    case "test" =>
+    case QueryController(id) =>
       log.info(s"Receiving request to query controller")
-      sender ! FlowCollector.getSwitchFlows(1)
-    case "shut" =>
+      sender ! FlowCollector.getSwitchFlows(id)
+    case Stop =>
       log.info(s"Shuting down")
       context stop self
     case x => log.warning("Received unknown message: {}", x)
