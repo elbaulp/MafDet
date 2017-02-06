@@ -7,10 +7,10 @@ import akka.util.Timeout
 import mafdet.modules.flowcollector.{ FlowCollector, UpdateStatistics }
 import mafdet.modules.flowcollector.UpdateStatistics._
 import org.json4s._
-import org.specs2.Specification
+import org.specs2.Spec
 import org.specs2.specification.script.{ GWT, StandardRegexStepParsers }
 
-class FlowCollectorSpec extends Specification
+class FlowCollectorSpec extends Spec
   with GWT
   with StandardRegexStepParsers {
   def is =
