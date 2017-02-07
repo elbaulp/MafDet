@@ -1,16 +1,18 @@
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 import akka.actor.{ ActorSystem, Props }
 import akka.pattern.ask
 import akka.util.Timeout
 import mafdet.modules.flowcollector.{ FlowCollector, UpdateStatistics }
+import mafdet.modules.featureextractor._
 import mafdet.modules.flowcollector.UpdateStatistics._
 import org.json4s._
-import org.specs2.Spec
+import org.specs2.Specification
 import org.specs2.specification.script.{ GWT, StandardRegexStepParsers }
 
-class FlowCollectorSpec extends Spec
+class FlowCollectorSpec extends Specification
   with GWT
   with StandardRegexStepParsers {
   def is =
@@ -24,7 +26,14 @@ class FlowCollectorSpec extends Spec
       Given an akka actor
       When querying the controller through the actor for switch id 1
       Then a vector of size 1 with the statistics must be returned ${intervals.end}
+
+     Extract features using statistics gathered at ten intervals   ${features.start}
+      Given a 10 interval value
+      When querying the controller 10 times
+      Then FeatureExtractor should compute the features            ${features.end}
     """
+
+
 
   private[this] val aJsonKey = aString
   private[this] val jsonResponse = readAs(".*").and((_: String) =>
@@ -53,4 +62,21 @@ class FlowCollectorSpec extends Spec
           Vector(Await.result(future, timeout.duration).asInstanceOf[JValue])
       }.
       andThen(anInt) { case expected :: result :: _ => expected must_== result.size }
+
+  private[this] val features =
+    Scenario("Features").
+      given(anInt).
+      when(anInt) {
+        case a :: b :: _ =>
+          val system = ActorSystem("MySystem")
+          val actor = system.actorOf(Props[UpdateStatistics])
+          implicit val timeout = Timeout(5 seconds)
+          val q1 = actor ? QueryController(1)
+
+          Await.result(q1, timeout.duration).asInstanceOf[JValue]
+      }.
+      andThen() { case _ :: b :: _ =>
+        val result = FeatureExtractor.getFeatures(b)
+        result must contain(allOf(be_>(0.0)))
+      }
 }

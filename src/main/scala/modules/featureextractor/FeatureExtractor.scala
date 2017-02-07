@@ -147,4 +147,15 @@ object FeatureExtractor {
       case 1 => pktSorted(nflows / 2)
     }
   }
+
+  def getFeatures(stats: JValue): Vector[Double] = {
+    val apf = APf(stats).toDouble
+    val abf = ABf(stats).toDouble
+    val adf = ADf(stats).toDouble
+    val ppf = PPf(stats)
+    val gsf = GSf(stats)
+    val gdp = GDp(stats)
+
+    Vector(apf,abf,adf,ppf,gsf,gdp)
+  }
 }
