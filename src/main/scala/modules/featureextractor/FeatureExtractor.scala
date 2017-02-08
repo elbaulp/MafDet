@@ -93,11 +93,11 @@ object FeatureExtractor {
   }
 
   /**
-    * Growth of Different ports
-    *
-    * @param
-    * @return Growth of different ports in interval
-    */
+   * Growth of Different ports
+   *
+   * @param
+   * @return Growth of different ports in interval
+   */
   def GDp(flows: JValue): Double = {
     val uniquePorts = (flows \\ Constants.TcpDstKey \ classOf[JInt]).distinct.size
 
@@ -148,6 +148,12 @@ object FeatureExtractor {
     }
   }
 
+  /**
+   * Compute all features at once.
+   *
+   * @param stats Switch's stats
+   * @return Vector[Double] with the features
+   */
   def getFeatures(stats: JValue): Vector[Double] = {
     val apf = APf(stats).toDouble
     val abf = ABf(stats).toDouble
@@ -156,6 +162,6 @@ object FeatureExtractor {
     val gsf = GSf(stats)
     val gdp = GDp(stats)
 
-    Vector(apf,abf,adf,ppf,gsf,gdp)
+    Vector(apf, abf, adf, ppf, gsf, gdp)
   }
 }

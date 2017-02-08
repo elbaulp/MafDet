@@ -1,16 +1,15 @@
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.language.postfixOps
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
-import mafdet.modules.flowcollector.{ FlowCollector, UpdateStatistics }
 import mafdet.modules.featureextractor._
+import mafdet.modules.flowcollector.{FlowCollector, UpdateStatistics}
 import mafdet.modules.flowcollector.UpdateStatistics._
 import org.json4s._
 import org.specs2.Specification
-import org.specs2.specification.script.{ GWT, StandardRegexStepParsers }
+import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
 
 class FlowCollectorSpec extends Specification
   with GWT
@@ -32,8 +31,6 @@ class FlowCollectorSpec extends Specification
       When querying the controller 10 times
       Then FeatureExtractor should compute the features            ${features.end}
     """
-
-
 
   private[this] val aJsonKey = aString
   private[this] val jsonResponse = readAs(".*").and((_: String) =>

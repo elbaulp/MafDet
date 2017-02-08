@@ -24,31 +24,36 @@
 
 package mafdet
 
-/* object MyActor {
- *   case class Greeting(from: String)
- *   case object Goodbye
- * }
- * class MyActor extends Actor with ActorLogging {
- *   import MyActor._
- *   def receive = {
- *     case Greeting(greeter) => log.info(s"I was greeted by $greeter.")
- *     case Goodbye
- *         => log.info("Someone said goodbye to me.")
- *   }
- * } */
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
+import akka.actor.{ActorSystem, Props}
+import mafdet.modules.flowcollector.UpdateStatistics
+import mafdet.modules.flowcollector.UpdateStatistics._
 
 /**
  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
  */
 object Main extends App {
-  /* val system = ActorSystem("MySystem")
-   * val actor = system.actorOf(Props[UpdateStatistics])
-   *
-   * import system.dispatcher
-   *
-   * val cancellable =
-   *   system.scheduler.schedule(0 milliseconds,
-   *     50 milliseconds,
-   *     actor,
-   *     "test") */
+  val system = ActorSystem("MySystem")
+  val actor = system.actorOf(Props[UpdateStatistics])
+
+  //actor ! UpdateStatistics.QueryController(1)
+  //actor2 ! "ADIOS"
+  //system.actorSelection("/user/*") ! "HOLA"
+
+
+  //system.eventStream.subscribe(actor, classOf[UpdateStatistics])
+
+  import system.dispatcher
+
+  val cancellable =
+    system.scheduler.schedule(0 milliseconds,
+      5 seconds,
+      actor,
+      QueryController(1))
+
+
+  //cancellable.cancel()
+  //system.terminate()
 }
