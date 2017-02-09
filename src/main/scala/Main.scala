@@ -27,7 +27,7 @@ package mafdet
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.ActorSystem
 import mafdet.modules.flowcollector.UpdateStatistics
 import mafdet.modules.flowcollector.UpdateStatistics._
 
@@ -36,7 +36,7 @@ import mafdet.modules.flowcollector.UpdateStatistics._
  */
 object Main extends App {
   val system = ActorSystem("MySystem")
-  val actor = system.actorOf(Props[UpdateStatistics])
+  val actor = system.actorOf(UpdateStatistics.props, "UpdateStatisticsActor")
 
   //actor ! UpdateStatistics.QueryController(1)
   //actor2 ! "ADIOS"

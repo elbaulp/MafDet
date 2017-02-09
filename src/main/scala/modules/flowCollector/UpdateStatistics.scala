@@ -1,5 +1,6 @@
 package mafdet.modules.flowcollector
 
+import akka.actor.Props
 import scala.concurrent.Future
 
 import akka.actor.Actor
@@ -14,6 +15,15 @@ object UpdateStatistics {
    */
   case class QueryController(dpId: Int)
   case object Stop
+
+  /**
+   * Create Props for an actor of this type.
+   *
+   * @return a Props for creating this actor, which can then be further configured
+   * (e.g. calling ‘.withDispatcher()‘ on it)
+   *
+   */
+  def props: Props = Props[UpdateStatistics]
 }
 
 class UpdateStatistics extends Actor with akka.actor.ActorLogging {
@@ -38,7 +48,7 @@ class UpdateStatistics extends Actor with akka.actor.ActorLogging {
     case Stop =>
       log.info(s"Shuting down")
       context stop self
-    case json:JValue =>
+    case json: JValue =>
       log.info("Getting json response, computing features...")
       val features = FeatureExtractor.getFeatures(json)
       log.debug(s"Features: $features")
