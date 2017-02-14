@@ -50,7 +50,6 @@ object Main extends App {
       statsCollectorActor,
       QueryController(1))
 
-
   //cancellable.cancel()
   //system.terminate()
 }
