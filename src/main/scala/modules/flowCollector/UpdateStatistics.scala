@@ -1,9 +1,8 @@
 package mafdet.modules.flowcollector
 
-import akka.actor.Props
 import scala.concurrent.Future
 
-import akka.actor.Actor
+import akka.actor.{Actor, Props, ActorRef}
 import mafdet.modules.featureextractor.FeatureExtractor
 import org.json4s._
 
@@ -23,10 +22,10 @@ object UpdateStatistics {
    * (e.g. calling ‘.withDispatcher()‘ on it)
    *
    */
-  def props: Props = Props[UpdateStatistics]
+  def props(fActor: ActorRef): Props = Props(new UpdateStatistics(fActor))
 }
 
-class UpdateStatistics extends Actor with akka.actor.ActorLogging {
+class UpdateStatistics(fActor: ActorRef) extends Actor with akka.actor.ActorLogging {
   import UpdateStatistics._
 
   override def preStart() = {
@@ -52,7 +51,8 @@ class UpdateStatistics extends Actor with akka.actor.ActorLogging {
       log.info("Getting json response, computing features...")
       val features = FeatureExtractor.getFeatures(json)
       log.debug(s"Features: $features")
-      sender ! features
-    case x => log.warning("Received unknown message: {}", x)
+      fActor ! features
+    case x =>
+      log.warning("Received unknown message: {}", x)
   }
 }

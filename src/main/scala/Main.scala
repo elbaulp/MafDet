@@ -24,33 +24,30 @@
 
 package mafdet
 
+import akka.actor.ActorDSL._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 import akka.actor.ActorSystem
 import mafdet.modules.flowcollector.UpdateStatistics
+import mafdet.modules.featureextractor.FeatureActor
 import mafdet.modules.flowcollector.UpdateStatistics._
 
 /**
  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
  */
 object Main extends App {
-  val system = ActorSystem("MySystem")
-  val actor = system.actorOf(UpdateStatistics.props, "UpdateStatisticsActor")
 
-  //actor ! UpdateStatistics.QueryController(1)
-  //actor2 ! "ADIOS"
-  //system.actorSelection("/user/*") ! "HOLA"
-
-
-  //system.eventStream.subscribe(actor, classOf[UpdateStatistics])
+  implicit val system = ActorSystem("MafDet")
+  val fActor = system.actorOf(FeatureActor.props, "FeatureActor")
+  val statsCollectorActor = system.actorOf(UpdateStatistics.props(fActor), "UpdateStatisticsActor")
 
   import system.dispatcher
 
   val cancellable =
     system.scheduler.schedule(0 milliseconds,
       5 seconds,
-      actor,
+      statsCollectorActor,
       QueryController(1))
 
 
