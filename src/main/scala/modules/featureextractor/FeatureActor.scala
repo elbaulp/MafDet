@@ -46,10 +46,8 @@ class FeatureActor extends Actor with ActorLogging {
       reason.getMessage, message.getOrElse(""))
 
   def receive = LoggingReceive {
-//    case a:Feature =>
-//      log.info("Got Feature: {}", a)
-    case b:Vector[_] =>
-      log.info("Got feature {}", b)
+    case Feature(a) =>
+      log.info("Got feature {}", a)
     case Stop =>
       log.info("Receive Stop message, shutting down")
       context.system.terminate()

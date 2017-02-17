@@ -39,7 +39,7 @@ object UpdateStatistics {
    *
    * @param dpId Switch's Id
     */
-  case class Feature(val value: Vector[Double]) extends AnyVal
+  final case class Feature(val value: Vector[Double]) extends AnyVal
   case class QueryController(dpId: Int)
   case object Start
   case object Stop
@@ -80,7 +80,7 @@ class UpdateStatistics extends Actor with ActorLogging {
       context stop self
     case json: JValue =>
       log.info("Getting json response, computing features...")
-      val features = FeatureExtractor.getFeatures(json)
+      val features = Feature(FeatureExtractor.getFeatures(json))
       log.debug(s"Features: $features")
       featureListener.get ! features
     case x =>
