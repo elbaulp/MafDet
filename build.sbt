@@ -22,7 +22,8 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2-core" % "3.8.8" % "test",
   "org.specs2" %% "specs2-gwt" % "3.8.8" % "test",
   "com.typesafe.akka" %% "akka-actor" % "2.4.16",
-  "com.typesafe.akka" %% "akka-testkit" % "2.4.16"
+  "com.typesafe.akka" %% "akka-testkit" % "2.4.16",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
 )
 
 scalacOptions in Test ++= Seq("-Yrangepos")

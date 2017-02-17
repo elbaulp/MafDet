@@ -24,13 +24,13 @@
 
 package mafdet
 
-import akka.actor.ActorDSL._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 import akka.actor.ActorSystem
-import mafdet.modules.flowcollector.UpdateStatistics
+import com.typesafe.config.ConfigFactory
 import mafdet.modules.featureextractor.FeatureActor
+import mafdet.modules.flowcollector.UpdateStatistics
 import mafdet.modules.flowcollector.UpdateStatistics._
 
 /**
@@ -38,18 +38,22 @@ import mafdet.modules.flowcollector.UpdateStatistics._
  */
 object Main extends App {
 
-  implicit val system = ActorSystem("MafDet")
+  val config = ConfigFactory.parseString("""
+    akka {
+       loggers = ["akka.event.slf4j.Slf4jLogger"]
+       akka.loglevel = "DEBUG"
+       logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+       akka.actor.debug {
+          receive = on
+          lifecycle = on
+       }
+    }
+    """)
+
+  val system = ActorSystem("MafDet", config)
   val fActor = system.actorOf(FeatureActor.props, "FeatureActor")
-  val statsCollectorActor = system.actorOf(UpdateStatistics.props(fActor), "UpdateStatisticsActor")
+  val statsCollectorActor = system.actorOf(UpdateStatistics.props, "UpdateStatisticsActor")
 
-  import system.dispatcher
+  statsCollectorActor.tell(Start, sender = fActor)
 
-  val cancellable =
-    system.scheduler.schedule(0 milliseconds,
-      5 seconds,
-      statsCollectorActor,
-      QueryController(1))
-
-  //cancellable.cancel()
-  //system.terminate()
 }

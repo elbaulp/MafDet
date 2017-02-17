@@ -25,8 +25,11 @@
 package mafdet.modules.flowcollector
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
-import akka.actor.{Actor, Props, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.event.LoggingReceive
 import mafdet.modules.featureextractor.FeatureExtractor
 import org.json4s._
 
@@ -35,8 +38,10 @@ object UpdateStatistics {
    * Query the controller for the given switch Id
    *
    * @param dpId Switch's Id
-   */
+    */
+  case class Feature(val value: Vector[Double]) extends AnyVal
   case class QueryController(dpId: Int)
+  case object Start
   case object Stop
 
   /**
@@ -46,24 +51,26 @@ object UpdateStatistics {
    * (e.g. calling ‘.withDispatcher()‘ on it)
    *
    */
-  def props(fActor: ActorRef): Props = Props(new UpdateStatistics(fActor))
+  def props: Props = Props[UpdateStatistics]
 }
 
-class UpdateStatistics(fActor: ActorRef) extends Actor with akka.actor.ActorLogging {
+class UpdateStatistics extends Actor with ActorLogging {
   import UpdateStatistics._
 
-  override def preStart() = {
-    log.debug("Starting")
-  }
+  var featureListener: Option[ActorRef] = None
+  import context.dispatcher
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit =
     log.error(reason, "Restarting due to [{}] when processing [{}]",
       reason.getMessage, message.getOrElse(""))
 
-  def receive = {
+  def receive = LoggingReceive {
+
+    case Start if featureListener.isEmpty =>
+      featureListener = Some(sender())
+      context.system.scheduler.schedule(Duration.Zero, 1 second, self, QueryController(1))
 
     case QueryController(id) =>
-      import context.dispatcher
       log.info(s"Receiving request to query controller")
       Future { FlowCollector.getSwitchFlows(1) } onComplete {
         f => self ! f.get
@@ -75,7 +82,7 @@ class UpdateStatistics(fActor: ActorRef) extends Actor with akka.actor.ActorLogg
       log.info("Getting json response, computing features...")
       val features = FeatureExtractor.getFeatures(json)
       log.debug(s"Features: $features")
-      fActor ! features
+      featureListener.get ! features
     case x =>
       log.warning("Received unknown message: {}", x)
   }
