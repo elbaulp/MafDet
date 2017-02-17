@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-import modules.flowcollector.FlowCollector
-import modules.featureextractor.{OFMatch, FeatureExtractor}
+import mafdet.modules.featureextractor.{FeatureExtractor, OFMatch}
+import mafdet.modules.flowcollector.FlowCollector
 import org.specs2.Specification
 import org.specs2.specification.script.{GWT, StandardRegexStepParsers}
 

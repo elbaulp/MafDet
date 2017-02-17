@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 
-package modules.flowcollector
+package mafdet.modules.flowcollector
 
-import Constants._
+import mafdet.modules.flowcollector.Constants._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.log4s._
+
 import scalaj.http.Http
 
 /**

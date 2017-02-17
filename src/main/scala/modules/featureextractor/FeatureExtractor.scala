@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-package modules.featureextractor
+package mafdet.modules.featureextractor
 
-import scala.annotation.switch
-
-import modules.flowcollector.Constants
+import mafdet.modules.flowcollector.Constants
 import org.json4s._
 import org.log4s._
+
+import scala.annotation.switch
 
 /**
  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
@@ -93,11 +93,11 @@ object FeatureExtractor {
   }
 
   /**
-    * Growth of Different ports
-    *
-    * @param
-    * @return Growth of different ports in interval
-    */
+   * Growth of Different ports
+   *
+   * @param
+   * @return Growth of different ports in interval
+   */
   def GDp(flows: JValue): Double = {
     val uniquePorts = (flows \\ Constants.TcpDstKey \ classOf[JInt]).distinct.size
 
@@ -146,5 +146,22 @@ object FeatureExtractor {
       case 0 => (pktSorted((nflows - 1) / 2) + pktSorted(nflows / 2)) / 2
       case 1 => pktSorted(nflows / 2)
     }
+  }
+
+  /**
+   * Compute all features at once.
+   *
+   * @param stats Switch's stats
+   * @return Vector[Double] with the features
+   */
+  def getFeatures(stats: JValue): Vector[Double] = {
+    val apf = APf(stats).toDouble
+    val abf = ABf(stats).toDouble
+    val adf = ADf(stats).toDouble
+    val ppf = PPf(stats)
+    val gsf = GSf(stats)
+    val gdp = GDp(stats)
+
+    Vector(apf, abf, adf, ppf, gsf, gdp)
   }
 }

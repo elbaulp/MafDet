@@ -22,13 +22,38 @@
  * SOFTWARE.
  */
 
-import org.json4s.native.JsonMethods.{ pretty, render }
-/**
-  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
-  */
+package mafdet
 
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
+import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
+import mafdet.modules.featureextractor.FeatureActor
+import mafdet.modules.flowcollector.UpdateStatistics
+import mafdet.modules.flowcollector.UpdateStatistics._
+
+/**
+ * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/7/16.
+ */
 object Main extends App {
-  //val logger = org.log4s.getLogger
-  //logger.info("Starting app")
-  //logger.debug(s"\n\n${pretty(render(FlowCollector.getSwitchFlows(1)))}\n\n")
+
+  val config = ConfigFactory.parseString("""
+    akka {
+       loggers = ["akka.event.slf4j.Slf4jLogger"]
+       akka.loglevel = "DEBUG"
+       logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+       akka.actor.debug {
+          receive = on
+          lifecycle = on
+       }
+    }
+    """)
+
+  val system = ActorSystem("MafDet", config)
+  val fActor = system.actorOf(FeatureActor.props, "FeatureActor")
+  val statsCollectorActor = system.actorOf(UpdateStatistics.props, "UpdateStatisticsActor")
+
+  statsCollectorActor.tell(Start, sender = fActor)
+
 }

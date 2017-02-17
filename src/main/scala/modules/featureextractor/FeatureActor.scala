@@ -22,19 +22,41 @@
  * SOFTWARE.
  */
 
-package mafdet.modules.flowcollector
+package mafdet.modules.featureextractor
 
-/**
-  * Created by Alejandro Alcalde <contacto@elbauldelprogramador.com> on 11/15/16.
-  */
-object Constants {
-  val BaseUrl      = "http://192.168.56.101:8080"
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
-  val FlowStats    = BaseUrl + "/stats/flow/"
+import akka.actor._
+import akka.event.LoggingReceive
+import mafdet.modules.flowcollector.UpdateStatistics
 
-  val PktCountKey  = "packet_count"
-  val ByteCountKey = "byte_count"
-  val DurationSec  = "duration_sec"
-  val MatchKey     = "match"
-  val TcpDstKey    = "tp_dst"
+object FeatureActor {
+  def props: Props = Props[FeatureActor]
+}
+
+class FeatureActor extends Actor with ActorLogging {
+  import UpdateStatistics._
+
+  // If we don’t get any progress within 15 seconds then the service is unavailable
+  context.setReceiveTimeout(15 seconds)
+
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit =
+    log.error(reason, "Restarting due to [{}] when processing [{}]",
+      reason.getMessage, message.getOrElse(""))
+
+  def receive = LoggingReceive {
+//    case a:Feature =>
+//      log.info("Got Feature: {}", a)
+    case b:Vector[_] =>
+      log.info("Got feature {}", b)
+    case Stop =>
+      log.info("Receive Stop message, shutting down")
+      context.system.terminate()
+    case ReceiveTimeout =>
+      log.error("Shutting down due to unavailable service")
+      context.system.terminate()
+    case x =>
+      log.warning("Received unknown message: {}", x)
+  }
 }
