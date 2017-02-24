@@ -24,32 +24,42 @@
 
 package mafdet.modules.featureextractor
 
+import java.io.File
+
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 import akka.actor._
 import akka.event.LoggingReceive
-import mafdet.modules.flowcollector.UpdateStatistics
+import com.github.tototoshi.csv._
 
 object FeatureActor {
   def props: Props = Props[FeatureActor]
 }
 
 class FeatureActor extends Actor with ActorLogging {
-  import UpdateStatistics._
+  import mafdet.modules.flowcollector.UpdateStatistics._
 
   // If we don’t get any progress within 15 seconds then the service is unavailable
   context.setReceiveTimeout(15 seconds)
+
+  private[this] val datasetName = "data/data.csv"
+  private[this] val dataset = new File(datasetName)
+  private[this] val writer = CSVWriter.open(dataset, append = true)
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit =
     log.error(reason, "Restarting due to [{}] when processing [{}]",
       reason.getMessage, message.getOrElse(""))
 
+  override def postStop(): Unit = writer.close
+
   def receive = LoggingReceive {
     case Feature(a) =>
       log.info("Got feature {}", a)
+      writer.writeRow(a)
     case Stop =>
       log.info("Receive Stop message, shutting down")
+      writer.close
       context.system.terminate()
     case ReceiveTimeout =>
       log.error("Shutting down due to unavailable service")
